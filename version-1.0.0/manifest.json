@@ -1,0 +1,18 @@
+{
+  "Name": "Material Patcher Fix",
+  "Version": "1.0.0",
+  "Id": "Souvy.MaterialPatcherFix",
+  "MinimumGameVersion": "1.0.0.0",
+  "Description": "Fixes BuildingPrefabMaterialPatcher so that inactive mesh variants (such as connected tubeways, vertical tubeways, and multi-model variants) receive material patches.",
+  "RequiredMods": [
+    {
+      "Id": "Harmony",
+      "MinimumVersion": "2.3.3"
+    },
+    {
+      "Id": "BobingaboutScriptPack",
+      "MinimumVersion": "1.0.0"
+    }
+  ]
+}
+

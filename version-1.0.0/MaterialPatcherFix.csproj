@@ -1,0 +1,61 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>10.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AssemblyName>MaterialPatcherFix</AssemblyName>
+    <OutputPath>.\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+
+  <ItemDefinitionGroup>
+    <Reference>
+      <Private>False</Private>
+    </Reference>
+  </ItemDefinitionGroup>
+
+  <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\workshop\content\1062090\3284904751\0Harmony.dll</HintPath>
+    </Reference>
+    <Reference Include="Timberborn.BaseComponentSystem">
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Timberborn\Timberborn_Data\Managed\Timberborn.BaseComponentSystem.dll</HintPath>
+    </Reference>
+    <Reference Include="Timberborn.BlueprintSystem">
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Timberborn\Timberborn_Data\Managed\Timberborn.BlueprintSystem.dll</HintPath>
+    </Reference>
+    <Reference Include="Timberborn.Debugging">
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Timberborn\Timberborn_Data\Managed\Timberborn.Debugging.dll</HintPath>
+    </Reference>
+    <Reference Include="Timberborn.EntitySystem">
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Timberborn\Timberborn_Data\Managed\Timberborn.EntitySystem.dll</HintPath>
+    </Reference>
+    <Reference Include="Timberborn.FactionSystem">
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Timberborn\Timberborn_Data\Managed\Timberborn.FactionSystem.dll</HintPath>
+    </Reference>
+    <Reference Include="Timberborn.GameFactionSystem">
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Timberborn\Timberborn_Data\Managed\Timberborn.GameFactionSystem.dll</HintPath>
+    </Reference>
+    <Reference Include="Timberborn.Modding">
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Timberborn\Timberborn_Data\Managed\Timberborn.Modding.dll</HintPath>
+    </Reference>
+    <Reference Include="Timberborn.ModManagerScene">
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Timberborn\Timberborn_Data\Managed\Timberborn.ModManagerScene.dll</HintPath>
+    </Reference>
+    <Reference Include="Timberborn.Timbermesh">
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Timberborn\Timberborn_Data\Managed\Timberborn.Timbermesh.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Collections.Immutable">
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Timberborn\Timberborn_Data\Managed\System.Collections.Immutable.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Timberborn\Timberborn_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+    <Reference Include="Bobingabout.MaterialPatcher">
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\workshop\content\1062090\3416879061\version-1.1\Scripts\Bobingabout.MaterialPatcher.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>
+
