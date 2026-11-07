@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
@@ -21,55 +22,121 @@ namespace Souvy.MaterialPatcherFix
             DevModeManager ____devModeManager,
             ISpecService ____specService)
         {
-            bool enabled = ____devModeManager != null && ____devModeManager.Enabled;
-            string name = __instance.Name.Replace("(Clone)", "").Replace("Preview", "").Trim();
-
-            foreach (BuildingPrefabMaterialPatchSpec item in ____specService.GetSpecs<BuildingPrefabMaterialPatchSpec>()
-                .Where(spec => ____factionService.Current.Id == spec.FactionID && spec.PrefabName == name))
+            if (__instance == null || ____specService == null || ____factionService?.Current == null)
             {
-                if (enabled)
-                {
-                    Debug.Log(__instance.Name + "_PatchSpecification");
-                }
+                return true;
+            }
 
-                // CRITICAL FIX: Pass includeInactive: true so ALL variants (connected tubeways, vertical tubeways, etc.) are included!
-                Renderer[] componentsInChildren = __instance.GameObject.GetComponentsInChildren<Renderer>(true);
+            bool devMode = ____devModeManager != null && ____devModeManager.Enabled;
+            string rawName = __instance.Name;
+            string name = rawName.Replace("(Clone)", "").Replace("Preview", "").Trim();
+            string factionId = ____factionService.Current.Id;
+
+            List<BuildingPrefabMaterialPatchSpec> matchingSpecs = ____specService.GetSpecs<BuildingPrefabMaterialPatchSpec>()
+                .Where(spec => spec.FactionID == factionId && MatchesPrefab(spec.PrefabName, name))
+                .ToList();
+
+            if (matchingSpecs.Count == 0)
+            {
+                if (devMode || name.Contains("Tubeway") || name.Contains("Levee") || name.Contains("Tunnel"))
+                {
+                    Debug.LogWarning($"[MaterialPatcherFix] No material patch found for '{rawName}' (clean: '{name}') in faction '{factionId}'");
+                }
+                return false;
+            }
+
+            Renderer[] componentsInChildren = __instance.GameObject.GetComponentsInChildren<Renderer>(true);
+            int totalReplaced = 0;
+
+            foreach (BuildingPrefabMaterialPatchSpec item in matchingSpecs)
+            {
                 foreach (Renderer val in componentsInChildren)
                 {
                     if (val == null) continue;
-                    if (enabled)
-                    {
-                        Debug.Log(val.name);
-                    }
 
                     List<Material> materials = val.sharedMaterials.ToList();
+                    bool rendererModified = false;
+
                     for (int i = 0; i < materials.Count; i++)
                     {
                         if (materials[i] == null) continue;
-                        if (enabled)
-                        {
-                            Debug.Log(materials[i].name);
-                        }
+                        string matName = materials[i].name;
 
-                        foreach (BuildingPrefabMaterialEntry item2 in item.MaterialEntries
-                            .Where(entry => materials[i].name.Contains(entry.MaterialName)))
+                        foreach (BuildingPrefabMaterialEntry entry in item.MaterialEntries)
                         {
-                            if (enabled)
+                            if (string.IsNullOrEmpty(entry.MaterialName) || string.IsNullOrEmpty(entry.NewMaterialName))
+                                continue;
+
+                            if (matName.IndexOf(entry.MaterialName, StringComparison.OrdinalIgnoreCase) >= 0)
                             {
-                                Debug.Log("Replacing " + materials[i].name + " on mesh " + val.name + " with " + item2.NewMaterialName);
+                                Material repMat = ____materialRepository.GetMaterial(entry.NewMaterialName);
+                                if (repMat != null)
+                                {
+                                    materials[i] = new Material(repMat)
+                                    {
+                                        shader = materials[i].shader != null ? materials[i].shader : repMat.shader,
+                                        color = Color.white
+                                    };
+                                    rendererModified = true;
+                                    totalReplaced++;
+
+                                    if (devMode)
+                                    {
+                                        Debug.Log($"[MaterialPatcherFix] Replaced '{matName}' on '{val.name}' of '{name}' with '{entry.NewMaterialName}'");
+                                    }
+                                }
+                                break;
                             }
-                            materials[i] = new Material(____materialRepository.GetMaterial(item2.NewMaterialName))
-                            {
-                                shader = materials[i].shader,
-                                color = Color.white
-                            };
                         }
                     }
-                    val.SetSharedMaterials(materials);
+
+                    if (rendererModified)
+                    {
+                        val.SetSharedMaterials(materials);
+                    }
                 }
             }
-            return false; // Skip the original method
+
+            if (totalReplaced > 0)
+            {
+                Debug.LogWarning($"[MaterialPatcherFix] Successfully patched '{name}': {totalReplaced} material(s) overridden for faction '{factionId}'.");
+            }
+
+            return false;
+        }
+
+        private static bool MatchesPrefab(string specPrefabName, string entityName)
+        {
+            if (string.IsNullOrEmpty(specPrefabName) || string.IsNullOrEmpty(entityName))
+                return false;
+
+            if (string.Equals(specPrefabName, entityName, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            // Handle path prefixes like "Buildings/Paths/Tubeway/TubewayLevee.IronTeeth" vs "TubewayLevee.IronTeeth"
+            if (entityName.EndsWith("/" + specPrefabName, StringComparison.OrdinalIgnoreCase) ||
+                entityName.EndsWith("." + specPrefabName, StringComparison.OrdinalIgnoreCase))
+                return true;
+            if (specPrefabName.EndsWith("/" + entityName, StringComparison.OrdinalIgnoreCase) ||
+                specPrefabName.EndsWith("." + entityName, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            // Handle naming alias differences (e.g. TubewayLevee vs LeveeTubeway)
+            string normSpec = specPrefabName.Replace("LeveeTubeway", "TubewayLevee");
+            string normEntity = entityName.Replace("LeveeTubeway", "TubewayLevee");
+            if (string.Equals(normSpec, normEntity, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            if (normEntity.EndsWith("/" + normSpec, StringComparison.OrdinalIgnoreCase) ||
+                normSpec.EndsWith("/" + normEntity, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            // Handle tunnel faction suffix fallback (e.g. TubewayLeveeTunnel.Whitepaws vs TubewayLeveeTunnel.IronTeeth)
+            if (normSpec.StartsWith("TubewayLeveeTunnel", StringComparison.OrdinalIgnoreCase) &&
+                normEntity.StartsWith("TubewayLeveeTunnel", StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            return false;
         }
     }
 }
-
