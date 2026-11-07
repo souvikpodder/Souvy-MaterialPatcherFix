@@ -4,3 +4,4 @@
     <BaseOutputPath>$(MSBuildThisFileDirectory)bin\</BaseOutputPath>
   </PropertyGroup>
 </Project>
+
