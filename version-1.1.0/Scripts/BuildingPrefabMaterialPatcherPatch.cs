@@ -72,11 +72,7 @@ namespace Souvy.MaterialPatcherFix
                                 Material repMat = ____materialRepository.GetMaterial(entry.NewMaterialName);
                                 if (repMat != null)
                                 {
-                                    materials[i] = new Material(repMat)
-                                    {
-                                        shader = materials[i].shader != null ? materials[i].shader : repMat.shader,
-                                        color = Color.white
-                                    };
+                                    materials[i] = new Material(repMat);
                                     rendererModified = true;
                                     totalReplaced++;
 
