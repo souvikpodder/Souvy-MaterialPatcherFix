@@ -79,7 +79,29 @@ namespace Souvy.MaterialPatcherFix
                             if (string.IsNullOrEmpty(entry.MaterialName) || string.IsNullOrEmpty(entry.NewMaterialName))
                                 continue;
 
+                            bool matches = false;
                             if (matName.IndexOf(entry.MaterialName, StringComparison.OrdinalIgnoreCase) >= 0)
+                            {
+                                matches = true;
+                            }
+                            else
+                            {
+                                string cleanMat = matName.Replace("(Instance)", "").Trim();
+                                int dotIdx = cleanMat.IndexOf('.');
+                                string baseMat = dotIdx > 0 ? cleanMat.Substring(0, dotIdx) : cleanMat;
+
+                                string cleanEntry = entry.MaterialName;
+                                int entryDot = cleanEntry.IndexOf('.');
+                                string baseEntry = entryDot > 0 ? cleanEntry.Substring(0, entryDot) : cleanEntry;
+
+                                if (string.Equals(baseMat, baseEntry, StringComparison.OrdinalIgnoreCase) ||
+                                    cleanMat.IndexOf(baseEntry, StringComparison.OrdinalIgnoreCase) >= 0)
+                                {
+                                    matches = true;
+                                }
+                            }
+
+                            if (matches)
                             {
                                 Material repMat = ____materialRepository.GetMaterial(entry.NewMaterialName);
                                 if (repMat != null)
