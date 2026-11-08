@@ -47,6 +47,18 @@ namespace Souvy.MaterialPatcherFix
 
             Renderer[] componentsInChildren = __instance.GameObject.GetComponentsInChildren<Renderer>(true);
             int totalReplaced = 0;
+            bool isTargetDebug = name.Contains("Tubeway") || name.Contains("Levee");
+
+            if (isTargetDebug)
+            {
+                Debug.LogWarning($"[MaterialPatcherFix] Inspecting '{name}' (raw: '{rawName}') with {matchingSpecs.Count} matching spec(s):");
+                foreach (Renderer r in componentsInChildren)
+                {
+                    if (r == null) continue;
+                    string matList = string.Join(", ", r.sharedMaterials.Select((m, idx) => $"[{idx}] {(m != null ? m.name : "null")}"));
+                    Debug.LogWarning($"[MaterialPatcherFix]   Renderer '{r.name}' (active: {r.gameObject.activeInHierarchy}): {matList}");
+                }
+            }
 
             foreach (BuildingPrefabMaterialPatchSpec item in matchingSpecs)
             {
@@ -76,9 +88,9 @@ namespace Souvy.MaterialPatcherFix
                                     rendererModified = true;
                                     totalReplaced++;
 
-                                    if (devMode)
+                                    if (devMode || isTargetDebug)
                                     {
-                                        Debug.Log($"[MaterialPatcherFix] Replaced '{matName}' on '{val.name}' of '{name}' with '{entry.NewMaterialName}'");
+                                        Debug.LogWarning($"[MaterialPatcherFix] [{name}] Mat[{i}] on '{val.name}' ('{matName}') -> replaced with '{entry.NewMaterialName}'");
                                     }
                                 }
                                 break;
